@@ -16,10 +16,15 @@ class SudokuPuzzle(Puzzle):
         @type symbols: list[str]
         @type symbol_set: set[str]
         """
+        # check n is greater than zero (cannot have negative grid)
         assert n > 0
+        # check n is a perfect square (to break into smaller square grids, etc.)
         assert round(n ** (1 / 2)) * round(n ** (1 / 2)) == n
+        # check all symbols in config (symbols) are in legal symbol_set
         assert all([d in (symbol_set | {"*"}) for d in symbols])
+        # check that there are enough symbols to fill whole line (n)
         assert len(symbol_set) == n
+        # check that there are enough symbols to fill whole grid (n*n)
         assert len(symbols) == n ** 2
         self._n, self._symbols, self._symbol_set = n, symbols, symbol_set
 
@@ -181,13 +186,34 @@ class SudokuPuzzle(Puzzle):
                  symbols[:i] + [d] + symbols[i + 1:], symbol_set)
                  for d in allowed_symbols])
 
-    # TODO
-    # override fail_fast
-    # Notice that it is not possible to complete a sudoku puzzle if there
-    # is one open position that has no symbols available to put in it.  In
-    # other words, if there is one open position where the symbols already used
-    # in the same row, column, and subsquare exhaust the symbols available,
-    # there is no point in continuing.
+
+    def fail_fast(self):
+        """
+        Return True iff Puzzle self contains an empty position where all legal
+        symbols have already been used in its row, column, and subsquare, and
+        therefore self cannot be extended to any solution. Overridden from
+        parent method.
+
+        @param self: Puzzle
+        @rtype: bool
+
+        >>> grid = ["A", "B", "C", "D"]
+        >>> grid += ["C", "D", "A", "B"]
+        >>> grid += ["B", "A", "D", "A"]
+        >>> grid += ["D", "C", "B", "*"]
+        >>> s = SudokuPuzzle(4, grid, {"A", "B", "C", "D"})
+        >>> s.fail_fast()
+        True
+        """
+        for i in range(0, self._n ** 2):
+            allowed_symbols = (self._symbol_set -
+                               (self._row_set(i) |
+                                self._column_set(i) |
+                                self._subsquare_set(i)))
+            # if i is empty but all legal symbols have already been used
+            if self._symbols[i] == '*' and not(allowed_symbols):
+                return True
+        return False
 
     # some helper methods
     def _row_set(self, m):
@@ -244,77 +270,77 @@ if __name__ == "__main__":
     import doctest
 
     doctest.testmod()
-    s = SudokuPuzzle(9,
-                     ["*", "*", "*", "7", "*", "8", "*", "1", "*",
-                      "*", "*", "7", "*", "9", "*", "*", "*", "6",
-                      "9", "*", "3", "1", "*", "*", "*", "*", "*",
-                      "3", "5", "*", "8", "*", "*", "6", "*", "1",
-                      "*", "*", "*", "*", "*", "*", "*", "*", "*",
-                      "1", "*", "6", "*", "*", "9", "*", "4", "8",
-                      "*", "*", "*", "*", "*", "1", "2", "*", "7",
-                      "8", "*", "*", "*", "7", "*", "4", "*", "*",
-                      "*", "6", "*", "3", "*", "2", "*", "*", "*"],
-                     {"1", "2", "3", "4", "5", "6", "7", "8", "9"})
-
-    from time import time
-
-    print("solving sudoku from July 9 2015 Star... \n\n{}\n\n".format(s))
-    from puzzle_tools import depth_first_solve
-
-    start = time()
-    sol = depth_first_solve(s)
-    print(sol)
-    while sol.children:
-        sol = sol.children[0]
-    end = time()
-    print("time to solve 9x9 using depth_first: "
-          "{} seconds\n".format(end - start))
-    print(sol)
-
-    s = SudokuPuzzle(9,
-                     ["*", "*", "*", "9", "*", "2", "*", "*", "*",
-                      "*", "9", "1", "*", "*", "*", "6", "3", "*",
-                      "*", "3", "*", "*", "7", "*", "*", "8", "*",
-                      "3", "*", "*", "*", "*", "*", "*", "*", "8",
-                      "*", "*", "9", "*", "*", "*", "2", "*", "*",
-                      "5", "*", "*", "*", "*", "*", "*", "*", "7",
-                      "*", "7", "*", "*", "8", "*", "*", "4", "*",
-                      "*", "4", "5", "*", "*", "*", "8", "1", "*",
-                      "*", "*", "*", "3", "*", "6", "*", "*", "*"],
-                     {"1", "2", "3", "4", "5", "6", "7", "8", "9"})
-
-    print("solving 3-star sudoku from \"That's Puzzling\","
-          "November 14th 2015\n\n{}\n\n".format(s))
-    start = time()
-    sol = depth_first_solve(s)
-    while sol.children:
-        sol = sol.children[0]
-    end = time()
-    print("time to solve 9x9 using depth_first: {} seconds\n".format(
-        end - start))
-    print(sol)
-
-    s = SudokuPuzzle(9,
-                     ["5", "6", "*", "*", "*", "7", "*", "*", "9",
-                      "*", "7", "*", "*", "4", "8", "*", "3", "1",
-                      "*", "*", "*", "*", "*", "*", "*", "*", "*",
-                      "4", "3", "*", "*", "*", "*", "*", "*", "*",
-                      "*", "8", "*", "*", "*", "*", "*", "9", "*",
-                      "*", "*", "*", "*", "*", "*", "*", "2", "6",
-                      "*", "*", "*", "*", "*", "*", "*", "*", "*",
-                      "1", "9", "*", "3", "6", "*", "*", "7", "*",
-                      "7", "*", "*", "1", "*", "*", "*", "4", "2"],
-                     {"1", "2", "3", "4", "5", "6", "7", "8", "9"})
-
-    print(
-        "solving 4-star sudoku from \"That's Puzzling\", "
-        "November 14th 2015\n\n{}\n\n".format(
-            s))
-    start = time()
-    sol = depth_first_solve(s)
-    while sol.children:
-        sol = sol.children[0]
-    end = time()
-    print("time to solve 9x9 using depth_first: {} seconds\n".format(
-        end - start))
-    print(sol)
+    # s = SudokuPuzzle(9,
+    #                  ["*", "*", "*", "7", "*", "8", "*", "1", "*",
+    #                   "*", "*", "7", "*", "9", "*", "*", "*", "6",
+    #                   "9", "*", "3", "1", "*", "*", "*", "*", "*",
+    #                   "3", "5", "*", "8", "*", "*", "6", "*", "1",
+    #                   "*", "*", "*", "*", "*", "*", "*", "*", "*",
+    #                   "1", "*", "6", "*", "*", "9", "*", "4", "8",
+    #                   "*", "*", "*", "*", "*", "1", "2", "*", "7",
+    #                   "8", "*", "*", "*", "7", "*", "4", "*", "*",
+    #                   "*", "6", "*", "3", "*", "2", "*", "*", "*"],
+    #                  {"1", "2", "3", "4", "5", "6", "7", "8", "9"})
+    #
+    # from time import time
+    #
+    # print("solving sudoku from July 9 2015 Star... \n\n{}\n\n".format(s))
+    # from puzzle_tools import depth_first_solve
+    #
+    # start = time()
+    # sol = depth_first_solve(s)
+    # print(sol)
+    # while sol.children:
+    #     sol = sol.children[0]
+    # end = time()
+    # print("time to solve 9x9 using depth_first: "
+    #       "{} seconds\n".format(end - start))
+    # print(sol)
+    #
+    # s = SudokuPuzzle(9,
+    #                  ["*", "*", "*", "9", "*", "2", "*", "*", "*",
+    #                   "*", "9", "1", "*", "*", "*", "6", "3", "*",
+    #                   "*", "3", "*", "*", "7", "*", "*", "8", "*",
+    #                   "3", "*", "*", "*", "*", "*", "*", "*", "8",
+    #                   "*", "*", "9", "*", "*", "*", "2", "*", "*",
+    #                   "5", "*", "*", "*", "*", "*", "*", "*", "7",
+    #                   "*", "7", "*", "*", "8", "*", "*", "4", "*",
+    #                   "*", "4", "5", "*", "*", "*", "8", "1", "*",
+    #                   "*", "*", "*", "3", "*", "6", "*", "*", "*"],
+    #                  {"1", "2", "3", "4", "5", "6", "7", "8", "9"})
+    #
+    # print("solving 3-star sudoku from \"That's Puzzling\","
+    #       "November 14th 2015\n\n{}\n\n".format(s))
+    # start = time()
+    # sol = depth_first_solve(s)
+    # while sol.children:
+    #     sol = sol.children[0]
+    # end = time()
+    # print("time to solve 9x9 using depth_first: {} seconds\n".format(
+    #     end - start))
+    # print(sol)
+    #
+    # s = SudokuPuzzle(9,
+    #                  ["5", "6", "*", "*", "*", "7", "*", "*", "9",
+    #                   "*", "7", "*", "*", "4", "8", "*", "3", "1",
+    #                   "*", "*", "*", "*", "*", "*", "*", "*", "*",
+    #                   "4", "3", "*", "*", "*", "*", "*", "*", "*",
+    #                   "*", "8", "*", "*", "*", "*", "*", "9", "*",
+    #                   "*", "*", "*", "*", "*", "*", "*", "2", "6",
+    #                   "*", "*", "*", "*", "*", "*", "*", "*", "*",
+    #                   "1", "9", "*", "3", "6", "*", "*", "7", "*",
+    #                   "7", "*", "*", "1", "*", "*", "*", "4", "2"],
+    #                  {"1", "2", "3", "4", "5", "6", "7", "8", "9"})
+    #
+    # print(
+    #     "solving 4-star sudoku from \"That's Puzzling\", "
+    #     "November 14th 2015\n\n{}\n\n".format(
+    #         s))
+    # start = time()
+    # sol = depth_first_solve(s)
+    # while sol.children:
+    #     sol = sol.children[0]
+    # end = time()
+    # print("time to solve 9x9 using depth_first: {} seconds\n".format(
+    #     end - start))
+    # print(sol)
