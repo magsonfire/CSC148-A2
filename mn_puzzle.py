@@ -84,6 +84,7 @@ class MNPuzzle(Puzzle):
     # symbol to the left, right, above, or below "*" with "*"
     def extensions(self):
 	    """
+	    R
 		"""
 		#remember position of * by the row it's in and the column it's in
 		for row in from_grid:
