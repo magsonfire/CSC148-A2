@@ -54,8 +54,10 @@ class MNPuzzle(Puzzle):
 		
 		@param MNPuzzle self: this MNPuzzle
 		@rtype: str
-		
 		"""
+		pass
+		
+	
     # TODO
     # override extensions
     # legal extensions are configurations that can be reached by swapping one
