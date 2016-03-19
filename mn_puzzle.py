@@ -54,14 +54,81 @@ class MNPuzzle(Puzzle):
 		
 		@param MNPuzzle self: this MNPuzzle
 		@rtype: str
-		"""
-		pass
 		
+		>>> p1 = MNPuzzle ((("*", "2", "3"), ("1", "4", "5")), (("1", "2", "3"), ("4", "5", "*")))
+		>>> print(p1)
+		
+		* 2 3 
+		1 4 5
+		=====
+		Target:
+		=====
+		1 2 3
+		4 5 *
+		
+		"""
+		current = " "
+		    for c in from_grid:
+			    row = " ".join(c)
+				current += row + "\n"
+			current += "=====" + "\n" + "Target:" + \\
+			            "=====" + "\n"
+			for d in to_grid:
+			    row = " ".join(d)
+				current += row + "\n"
+		return current
 	
     # TODO
     # override extensions
     # legal extensions are configurations that can be reached by swapping one
     # symbol to the left, right, above, or below "*" with "*"
+    def extensions(self):
+	    """
+		"""
+		#remember position of * by the row it's in and the column it's in
+		for row in from_grid:
+		    if "*" in row:
+			    row_position = from_grid.index(row)
+				column_position = row.index("*")
+				
+		#if the position to the RIGHT of the * does not exist,
+		#i.e. the * is in the last column, 
+		#i.e. column_position + 1 > length of the row, 
+		#then this move to the right does not exist either
+		#so if column_position + 1 < length of the row,
+		#start building the tuple that would make up the 'from_grid' parameter in the MNPuzzle init method
+		if column_position + 1 < len(from_grid[0]):
+		    
+			#copy all the rows above the row containing *
+			#i.e. copy all the rows from from_grid[0] up to but not including from_grid[row_position]
+			#then need to reconstruct the row (which is a tuple) containing * 
+			#with the * swapped with the symbol at column_position + 1
+			#need to put in if/else condition for when the * ends up being swapped into the last column
+			#or will get an error
+			#i.e. can't call from_grid[row_position][column_position + 2:] because index not in range
+			#then finish up by copying in all the rows after the row containing *
+		    next_grid = (from_grid[:row_position], (from_grid[row_position][:column_position], \\
+			                                        from_grid[row_position][column_position + 1], \\
+													"*", \\
+			                                        from_grid[row_position][column_position + 2:] if column_position + 2 else pass), \\
+													from_grid[row_position + 1:])
+			#finally create the MNPuzzle object with the configuration of having moved the * to the right
+			#this possible configuration will be added to a list at the end after having
+			#created all the other possible extensions
+		    move_right = MNPuzzle(next_grid, to_grid)
+		
+		#if the * is not located in the first column, then the possibility
+		#to move * to the left exists
+		if column_position - 1 > 0:
+		    next_grid = (from_grid[:row_position], (from_grid[row_position][:column_position - 1] if column_position - 1 > 0 else pass, \\
+			                                        "*", \\
+													from_grid[row_position][column_position - 1], \\
+													from_grid[row_position][column_position:]), \\
+													from_grid[row_position + 1:])
+			move_left = MNPuzzle(next_grid, to_grid)
+		if row_position > 0:   
+		    next_grid = (from_grid[:row_position - 1], (from_grid[row_position - 1][:column_position], "*", from_grid[row_position - 1][column_position + 1:]), \\
+			    ()
 
     # TODO
     # override is_solved
