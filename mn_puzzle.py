@@ -111,7 +111,7 @@ class MNPuzzle(Puzzle):
 		    next_grid = (from_grid[:row_position], (from_grid[row_position][:column_position], \\
 			                                        from_grid[row_position][column_position + 1], \\
 													"*", \\
-			                                        from_grid[row_position][column_position + 2:] if column_position + 2 else pass), \\
+			                                        from_grid[row_position][column_position + 2:] if column_position + 2 > len(from_grid[0]) - 1 else pass), \\
 													from_grid[row_position + 1:])
 			#finally create the MNPuzzle object with the configuration of having moved the * to the right
 			#this possible configuration will be added to a list at the end after having
