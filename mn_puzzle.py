@@ -28,7 +28,34 @@ class MNPuzzle(Puzzle):
     # TODO
     # implement __eq__ and __str__
     # __repr__ is up to you
-
+    def __eq__(self, other):
+	    """
+		Return whether self is equivalent to other.
+		
+		@param MNPuzzle self: this MNPuzzle
+		@param MNPuzzle|object other: object to compare to self
+		@rtype: bool
+		
+		>>> start = (("*", "2", "3"), ("1", "4", "5"))
+		>>> finish = (("1", "2", "3"), ("4", "5", "*"))
+		>>> p1 = MNPuzzle(start, finish)
+		>>> p2 = MNPuzzle ((("*", "2", "3"), ("1", "4", "5")), (("1", "2", "3"), ("4", "5", "*")))
+		>>> p3 = MNPuzzle ((("1", "*", "3"), ("4", "2", "5")), (("1", "2", "3"), ("4", "5", "*")))
+		>>> p1 == p2
+		True
+		>>> p2 == p3
+		False
+		"""
+		pass
+	
+	def __str__(self):
+	    """
+		Return a human-friendly representation of MNPuzzle self.
+		
+		@param MNPuzzle self: this MNPuzzle
+		@rtype: str
+		
+		"""
     # TODO
     # override extensions
     # legal extensions are configurations that can be reached by swapping one
