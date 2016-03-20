@@ -26,6 +26,9 @@ def depth_first_solve(puzzle):
     @type puzzle: Puzzle
     @rtype: PuzzleNode
     """
+    # check if config has been encountered before
+    # check if config is_solved
+    # make curr_extension next_extension
 
 
 # TODO
@@ -100,3 +103,4 @@ class PuzzleNode:
         """
         return "{}\n\n{}".format(self.puzzle,
                                  "\n".join([str(x) for x in self.children]))
+
