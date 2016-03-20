@@ -46,6 +46,10 @@ Network Trash Folder
 Temporary Items
 .apdisk
 *.pyc
+<<<<<<< HEAD
 grid_peg_solitaire_puzzle-MC.py
 sudoku_puzzle_MC.py
 mn_puzzle_MC.py
+=======
+.idea
+>>>>>>> refs/remotes/origin/peg_solitaire
