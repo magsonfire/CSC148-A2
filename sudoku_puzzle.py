@@ -268,7 +268,6 @@ class SudokuPuzzle(Puzzle):
 
 if __name__ == "__main__":
     import doctest
-
     doctest.testmod()
     s = SudokuPuzzle(9,
                      ["*", "*", "*", "7", "*", "8", "*", "1", "*",

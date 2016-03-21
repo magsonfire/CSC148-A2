@@ -32,64 +32,51 @@ def depth_first_solve(puzzle):
         return None
 
     # from starting configuration, perform depth-first search for solution
-    start = PuzzleNode(puzzle, [PuzzleNode(c) for c in puzzle.extensions()]) \
-        if puzzle.extensions() != [] else PuzzleNode(puzzle)
-    return depth_first_search(start)
+    results = depth_first_search(get_node(puzzle))
+    return process_dps_results(results)
 
 
-def add_children(pn):
-    """
-    Add PuzzleNode children to a given PuzleNode pn.
+    def depth_first_search(start):
+        """
+        Return the first PuzzleNode that leads to a solution extended from the
+        starting PuzzleNode start.
 
-    @type puzzle: Puzzle
-    @type parent: PuzzleNode
-    @rtype: PuzzleNode
+        DPS traversal iteration implementation adapted from:
+        http://kmkeen.com/python-trees/2010-09-18-08-55-50-039.html
 
-    >>> a = WordLadderPuzzle("save", "same", {"same", "save"})
-    >>> print(get_puzzle_node(a))
-    WordLadderPuzzle(save -> same)
-    <BLANKLINE>
-    WordLadderPuzzle(same -> same)
-    <BLANKLINE>
-    <BLANKLINE>
-    >>> b = WordLadderPuzzle("same", "same", {"same"})
-    >>> print(get_puzzle_node(b))
-    WordLadderPuzzle(same -> same)
-    <BLANKLINE>
-    <BLANKLINE>
-    """
-    pn.children = pn.puzzle.extensions() if pn.puzzle.extensions() else pass
+        @type start: PuzzleNode
+        @rtype: PuzzleNode
+        """
+        visited = []
+        # initialize deque as FIFO stack (mimicking system call stack)
+        to_crawl = deque()
+        to_crawl.append(start)
+
+        # before stack is empty
+        while to_crawl:
+            # remove top node from stack
+            current = to_crawl.pop()
+            # if children exist
+            if current.children:
+                # add child nodes to stack
+                for c in current.children:
+                    to_crawl.append(get_node(c.puzzle, current))
+            if current not in visited:
+                visited.append(current)
+                # if current node is solution, exit function and return node
+                if current.puzzle.is_solved():
+                    return visited
+        return visited
 
 
-def depth_first_search(node):
-    """
-    Return a set of PuzzleNodes traversed in the process of finding a solution
-    to the puzzle configuration contained in PuzzleNode node.
+    def process_dps_results(results):
+        """
+        Return the root PuzzledNode that can be extended to a solution PuzzleNode.
 
-    @type node: PuzzleNode
-    @rtype: set{PuzzleNode}
-    """
-    visited = {}
-    # initialize deque as FIFO stack (mimicking system call stack)
-    to_crawl = deque(node)
-
-    # pop current node being crawled
-    node = to_crawl.pop()
-    if node.children:
-        for c in node.children:
-            # add child to stack
-            to_crawl.append(c)
-
-    # graph crawl iteration code taken from: [source]
-    # before stack is empty (i.e. nodes left to visit)
-    while to_crawl:
-        if node not in visited:
-            visited.add(node)
-            # exit function and return visited nodes if solution found
-            if node.puzzle.is_solved():
-                return visited[0]
-        node = deque.pop()
-    return visited[0]
+        @type search_results: list[PuzzleNode]
+        @rtype: PuzzleNode
+        """
+        pass
 
 # TODO
 # implement breadth_first_solve
@@ -108,6 +95,33 @@ def breadth_first_solve(puzzle):
     @rtype: PuzzleNode
     """
 
+
+def get_node(puzzle, parent=None):
+    """
+    Return a PuzzleNode from puzzle puzzle, with parent parent.
+
+    @type puzzle: Puzzle
+    @type parent: PuzzleNode | None
+    @rtype: PuzzleNode
+    >>> a = WordLadderPuzzle("save", "same", {"same", "save"})
+    >>> print(get_node(a))
+    WordLadderPuzzle(save -> same)
+    <BLANKLINE>
+    WordLadderPuzzle(same -> same)
+    <BLANKLINE>
+    <BLANKLINE>
+    >>> b = WordLadderPuzzle("same", "same", {"same"})
+    >>> print(get_node(b))
+    WordLadderPuzzle(same -> same)
+    <BLANKLINE>
+    <BLANKLINE>
+    """
+    new_node = PuzzleNode(puzzle)
+    if puzzle.extensions():
+        new_node.children = [PuzzleNode(c) for c in puzzle.extensions()]
+    if parent:
+        new_node.parent = parent
+    return new_node
 
 # Class PuzzleNode helps build trees of PuzzleNodes that have
 # an arbitrary number of children, and a parent.
