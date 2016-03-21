@@ -24,8 +24,18 @@ class GridPegSolitairePuzzle(Puzzle):
         assert all([x == "*" or x == "." or x == "#" for x in marker_set])
         self._marker, self._marker_set = marker, marker_set
 
-    # TODO
     # implement __eq__, __str__ methods
+    def __eq__(self, other):
+
+        return(type(other) == type(self) and
+               self._marker == other._marker and
+               self._marker_set == other._marker_set)
+
+    def __str__(self):
+        for r in self._marker:
+            for c in self._marker:
+                print('row {} : {} coloumn {} : {}').format(r,self._marker[r],c,self._marker[c])
+
     # __repr__ is up to you
 
     def extensions(self):
@@ -35,58 +45,58 @@ class GridPegSolitairePuzzle(Puzzle):
         #helper function to find Pegs
         def find_peg(marker):
             peg_locations = []
-            for x in range(len(marker)):
-                for y in range(len(marker[x])):
-                    if marker[x][y] == '*':
-                        peg_locations.append((x,y))
+            for r in range(len(marker)):
+                for c in range(len(marker[r])):
+                    if marker[r][c] == '*':
+                        peg_locations.append((r,c))
 
             return peg_locations
 
-        def get_position(x,y):
-            #check if X and Y are in the proper bounds
-            if x >= 0 and x < len(self._marker) and y >= 0 and y < len(self._marker[0]):
-                return self._marker[x][y]
+        def get_position(r,c):
+            #check if R and C are in the proper bounds
+            if r >= 0 and r < len(self._marker) and c >= 0 and c < len(self._marker[0]):
+                return self._marker[r][c]
             else:
                 return None
 
-        def check_right(x,y):
-            return get_position(x,y+1) == "*" and get_position(x,y+2) == '.'
+        def check_right(r,c):
+            return get_position(r,c+1) == "*" and get_position(r,c+2) == '.'
 
-        def move_right(x,y):
+        def move_right(r,c):
             new_config = self._marker[:]
-            new_config[x][y] = '.'
-            new_config[x][y+1] = '.'
-            new_config[x][y+2] = '*'
+            new_config[r][c] = '.'
+            new_config[r][c+1] = '.'
+            new_config[r][c+2] = '*'
             return GridPegSolitairePuzzle(new_config, self._marker_set)
 
-        def check_left(x,y):
-            return get_position(x,y-1) == "*" and get_position(x,y-2) =='.'
+        def check_left(r,c):
+            return get_position(r,c-1) == "*" and get_position(r,c-2) =='.'
 
-        def move_left(x,y):
+        def move_left(r,c):
             new_config = self._marker[:]
-            new_config[x][y] ='.'
-            new_config[x][y-1] = '.'
-            new_config[x][y-2] = '*'
+            new_config[r][c] ='.'
+            new_config[r][c-1] = '.'
+            new_config[r][c-2] = '*'
             return GridPegSolitairePuzzle(new_config,self._marker_set)
 
-        def check_up(x,y):
-            return get_position(x-1, y) == '*' and get_position(x-2,y) == '.'
+        def check_up(r,c):
+            return get_position(r-1, c) == '*' and get_position(r-2,c) == '.'
 
-        def move_up(x,y):
+        def move_up(r,c):
             new_config = self._marker[:]
-            new_config[x][y] ='.'
-            new_config[x-1][y] = '.'
-            new_config[x-2][y] = '*'
+            new_config[r][c] ='.'
+            new_config[r-1][c] = '.'
+            new_config[r-2][c] = '*'
             return GridPegSolitairePuzzle(new_config,self._marker_set)
 
-        def check_down(x,y):
-            return get_position(x+1, y) == '*' and get_position(x+2,y) == '.'
+        def check_down(r,c):
+            return get_position(r+1, c) == '*' and get_position(r+2,c) == '.'
 
-        def move_down(x,y):
+        def move_down(r,c):
             new_config = self._marker[:]
-            new_config[x][y] ='.'
-            new_config[x+1][y] = '.'
-            new_config[x+2][y] = '*'
+            new_config[r][c] ='.'
+            new_config[r+1][c] = '.'
+            new_config[r+2][c] = '*'
             return GridPegSolitairePuzzle(new_config,self._marker_set)
 
         possible_extensions = []
