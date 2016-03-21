@@ -28,7 +28,7 @@ class WordLadderPuzzle(Puzzle):
         other.
 
         @type self: WordLadderPuzle
-        @type other: WordLadderPuzzle
+        @type other: WordLadderPuzzle | Any
         @rtype: bool
 
         >>> word_set = {"safe", "same", "save"}

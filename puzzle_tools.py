@@ -36,47 +36,47 @@ def depth_first_solve(puzzle):
     return process_dps_results(results)
 
 
-    def depth_first_search(start):
-        """
-        Return the first PuzzleNode that leads to a solution extended from the
-        starting PuzzleNode start.
+def depth_first_search(start):
+    """
+    Return the first PuzzleNode that leads to a solution extended from the
+    starting PuzzleNode start.
 
-        DPS traversal iteration implementation adapted from:
-        http://kmkeen.com/python-trees/2010-09-18-08-55-50-039.html
+    DPS traversal iteration implementation adapted from:
+    http://kmkeen.com/python-trees/2010-09-18-08-55-50-039.html
 
-        @type start: PuzzleNode
-        @rtype: PuzzleNode
-        """
-        visited = []
-        # initialize deque as FIFO stack (mimicking system call stack)
-        to_crawl = deque()
-        to_crawl.append(start)
+    @type start: PuzzleNode
+    @rtype: PuzzleNode
+    """
+    visited = set()
+    # initialize deque as FIFO stack (mimicking system call stack)
+    to_crawl = deque()
+    to_crawl.append(start)
 
-        # before stack is empty
-        while to_crawl:
-            # remove top node from stack
-            current = to_crawl.pop()
-            # if children exist
-            if current.children:
-                # add child nodes to stack
-                for c in current.children:
-                    to_crawl.append(get_node(c.puzzle, current))
-            if current not in visited:
-                visited.append(current)
-                # if current node is solution, exit function and return node
-                if current.puzzle.is_solved():
-                    return visited
-        return visited
+    # before stack is empty
+    while to_crawl:
+        # remove top node from stack
+        current = to_crawl.pop()
+        # if children exist
+        if current.children:
+            # add child nodes to stack
+            for c in current.children:
+                to_crawl.append(get_node(c.puzzle, current))
+        if current not in visited:
+            visited.append(current)
+            # if current node is solution, exit function and return node
+            if current.puzzle.is_solved():
+                return visited
+    return visited
 
 
-    def process_dps_results(results):
-        """
-        Return the root PuzzledNode that can be extended to a solution PuzzleNode.
+def process_dps_results(results):
+    """
+    Return the root PuzzledNode that can be extended to a solution PuzzleNode.
 
-        @type search_results: list[PuzzleNode]
-        @rtype: PuzzleNode
-        """
-        pass
+    @type search_results: list[PuzzleNode]
+    @rtype: PuzzleNode
+    """
+    pass
 
 # TODO
 # implement breadth_first_solve
