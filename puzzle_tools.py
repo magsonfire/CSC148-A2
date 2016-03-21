@@ -2,6 +2,7 @@
 Some functions for working with puzzles
 """
 from puzzle import Puzzle
+from word_ladder_puzzle import WordLadderPuzzle
 from collections import deque
 # set higher recursion limit
 # which is needed in PuzzleNode.__str__
@@ -26,10 +27,69 @@ def depth_first_solve(puzzle):
     @type puzzle: Puzzle
     @rtype: PuzzleNode
     """
-    # check if config has been encountered before
-    # check if config is_solved
-    # make curr_extension next_extension
+    # return none if unsolvable puzzle
+    if puzzle.fail_fast():
+        return None
 
+    # from starting configuration, perform depth-first search for solution
+    start = PuzzleNode(puzzle, [PuzzleNode(c) for c in puzzle.extensions()]) \
+        if puzzle.extensions() != [] else PuzzleNode(puzzle)
+    return depth_first_search(start)
+
+
+def add_children(pn):
+    """
+    Add PuzzleNode children to a given PuzleNode pn.
+
+    @type puzzle: Puzzle
+    @type parent: PuzzleNode
+    @rtype: PuzzleNode
+
+    >>> a = WordLadderPuzzle("save", "same", {"same", "save"})
+    >>> print(get_puzzle_node(a))
+    WordLadderPuzzle(save -> same)
+    <BLANKLINE>
+    WordLadderPuzzle(same -> same)
+    <BLANKLINE>
+    <BLANKLINE>
+    >>> b = WordLadderPuzzle("same", "same", {"same"})
+    >>> print(get_puzzle_node(b))
+    WordLadderPuzzle(same -> same)
+    <BLANKLINE>
+    <BLANKLINE>
+    """
+    pn.children = pn.puzzle.extensions() if pn.puzzle.extensions() else pass
+
+
+def depth_first_search(node):
+    """
+    Return a set of PuzzleNodes traversed in the process of finding a solution
+    to the puzzle configuration contained in PuzzleNode node.
+
+    @type node: PuzzleNode
+    @rtype: set{PuzzleNode}
+    """
+    visited = {}
+    # initialize deque as FIFO stack (mimicking system call stack)
+    to_crawl = deque(node)
+
+    # pop current node being crawled
+    node = to_crawl.pop()
+    if node.children:
+        for c in node.children:
+            # add child to stack
+            to_crawl.append(c)
+
+    # graph crawl iteration code taken from: [source]
+    # before stack is empty (i.e. nodes left to visit)
+    while to_crawl:
+        if node not in visited:
+            visited.add(node)
+            # exit function and return visited nodes if solution found
+            if node.puzzle.is_solved():
+                return visited[0]
+        node = deque.pop()
+    return visited[0]
 
 # TODO
 # implement breadth_first_solve
@@ -103,4 +163,3 @@ class PuzzleNode:
         """
         return "{}\n\n{}".format(self.puzzle,
                                  "\n".join([str(x) for x in self.children]))
-
