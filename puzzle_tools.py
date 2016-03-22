@@ -2,6 +2,7 @@
 Some functions for working with puzzles
 """
 from puzzle import Puzzle
+from word_ladder_puzzle import WordLadderPuzzle
 from collections import deque
 # set higher recursion limit
 # which is needed in PuzzleNode.__str__
@@ -21,11 +22,95 @@ def depth_first_solve(puzzle):
     """
     Return a path from PuzzleNode(puzzle) to a PuzzleNode containing
     a solution, with each child containing an extension of the puzzle
-    in its parent.  Return None if this is not possible.
+    in its parent. Return None if this is not possible.
 
     @type puzzle: Puzzle
     @rtype: PuzzleNode
     """
+    # return none if unsolvable puzzle
+    if puzzle.fail_fast():
+        return None
+
+    visited = set()
+    nodes = []
+    # until all extensions from starting config are exhausted
+    while not all([str(puzzle.extensions())]) in visited:
+        depth_first_search(puzzle, visited, nodes)
+
+    # solution_node should be last node visited
+    solution_node = nodes[-1]
+    return get_path(solution_node)
+
+
+def depth_first_search(start, visited, nodes, parent=None):
+    """
+    Search for a PuzzleNode containing the solution to the configuration in
+    PuzzleNode start.
+
+    @type start: Puzzle
+    @type visited: set{str}
+    @type nodes: list[PuzzleNode]
+    @type parent: PuzzleNode | None
+    @rtype: None
+    """
+    # if leaf node, return to last branching point to continue search
+    if not start:
+        return
+    elif start.__str__() in visited:
+        pass
+    elif start.is_solved():
+        return
+    else:
+        visited.add(start.__str__())
+        nodes.append(get_node(start, parent))
+        for ext in start.extensions():
+            depth_first_search(ext, visited, nodes, start)
+
+
+def get_node(puzzle, parent=None):
+    """
+    Return a PuzzleNode from puzzle puzzle, with parent parent.
+
+    @type puzzle: Puzzle
+    @type parent: PuzzleNode | None
+    @rtype: PuzzleNode
+    >>> a = WordLadderPuzzle("save", "same", {"same", "save"})
+    >>> print(get_node(a))
+    WordLadderPuzzle(save -> same)
+    <BLANKLINE>
+    WordLadderPuzzle(same -> same)
+    <BLANKLINE>
+    <BLANKLINE>
+    >>> b = WordLadderPuzzle("same", "same", {"same"})
+    >>> print(get_node(b))
+    WordLadderPuzzle(same -> same)
+    <BLANKLINE>
+    <BLANKLINE>
+    """
+    new_node = PuzzleNode(puzzle)
+    if puzzle.extensions():
+        new_node.children = [PuzzleNode(c) for c in puzzle.extensions()]
+    if parent:
+        new_node.parent = parent
+    return new_node
+
+
+def get_path(solution_node):
+    """
+    Return the first node in a doubly-linked list of PuzzleNodes from the
+    starting configuration to the PuzzleNode solution_node.
+
+    @type solution_node: PuzzleNode
+    @type visited: list[PuzzleNode]
+    @rtype: PuzzleNode
+    """
+    current = solution_node
+    # until at the root of the path (no parent)
+    while current.parent:
+        # walk over each node in doubly-linked list from solution_node
+        current = current.parent
+    return current
+
 
 
 # TODO
@@ -44,6 +129,32 @@ def breadth_first_solve(puzzle):
     @type puzzle: Puzzle
     @rtype: PuzzleNode
     """
+
+    q = deque()
+    start = PuzzleNode(puzzle)
+
+    q.append(start)
+    tried_ext = []
+    while q:
+        node = q.popleft()
+        # this returns error code 'Puzzle" object has no attribute 'puzzle' :(
+        children = node.puzzle.extensions()
+        for ext in children:
+            if ext not in tried_ext:
+                puzzle_node = PuzzleNode(ext)
+                puzzle_node.parent = node
+                node.children.append(puzzle_node)
+                if not ext.is_solved():
+                    q.append(ext)
+                    tried_ext.append(ext)
+                else:
+                    final = []
+                    cur_node = ext
+                    while cur_node:
+                        final.append(cur_node)
+                        cur_node = ext.parent
+                    return final.reverse()
+    return None
 
 
 # Class PuzzleNode helps build trees of PuzzleNodes that have
