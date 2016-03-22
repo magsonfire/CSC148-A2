@@ -58,3 +58,5 @@ mn_puzzle_MC.py
 grid_peg_solitaire_puzzle-MC.py
 sudoku_puzzle_MC.py
 >>>>>>> refs/heads/wordladder
+puzzle_tools-bfs.py
+puzzle_tools-2.py

@@ -22,7 +22,7 @@ def depth_first_solve(puzzle):
     """
     Return a path from PuzzleNode(puzzle) to a PuzzleNode containing
     a solution, with each child containing an extension of the puzzle
-    in its parent.  Return None if this is not possible.
+    in its parent. Return None if this is not possible.
 
     @type puzzle: Puzzle
     @rtype: PuzzleNode
@@ -31,69 +31,40 @@ def depth_first_solve(puzzle):
     if puzzle.fail_fast():
         return None
 
-    # from starting configuration, perform depth-first search for solution
-    results = depth_first_search(get_node(puzzle))
-    return process_dps_results(results)
-
-
-def depth_first_search(start):
-    """
-    Return the first PuzzleNode that leads to a solution extended from the
-    starting PuzzleNode start.
-
-    DPS traversal iteration implementation adapted from:
-    http://kmkeen.com/python-trees/2010-09-18-08-55-50-039.html
-
-    @type start: PuzzleNode
-    @rtype: PuzzleNode
-    """
     visited = set()
-    # initialize deque as FIFO stack (mimicking system call stack)
-    to_crawl = deque()
-    to_crawl.append(start)
+    nodes = []
+    # until all extensions from starting config are exhausted
+    while not all([str(puzzle.extensions())]) in visited:
+        depth_first_search(puzzle, visited, nodes)
 
-    # before stack is empty
-    while to_crawl:
-        # remove top node from stack
-        current = to_crawl.pop()
-        # if children exist
-        if current.children:
-            # add child nodes to stack
-            for c in current.children:
-                to_crawl.append(get_node(c.puzzle, current))
-        if current not in visited:
-            visited.append(current)
-            # if current node is solution, exit function and return node
-            if current.puzzle.is_solved():
-                return visited
-    return visited
+    # solution_node should be last node visited
+    solution_node = nodes[-1]
+    return get_path(solution_node)
 
 
-def process_dps_results(results):
+def depth_first_search(start, visited, nodes, parent=None):
     """
-    Return the root PuzzledNode that can be extended to a solution PuzzleNode.
+    Search for a PuzzleNode containing the solution to the configuration in
+    PuzzleNode start.
 
-    @type search_results: list[PuzzleNode]
-    @rtype: PuzzleNode
+    @type start: Puzzle
+    @type visited: set{str}
+    @type nodes: list[PuzzleNode]
+    @type parent: PuzzleNode | None
+    @rtype: None
     """
-    pass
-
-# TODO
-# implement breadth_first_solve
-# do NOT change the type contract
-# you are welcome to create any helper functions
-# you like
-# Hint: you may find a queue useful, that's why
-# we imported deque
-def breadth_first_solve(puzzle):
-    """
-    Return a path from PuzzleNode(puzzle) to a PuzzleNode containing
-    a solution, with each child PuzzleNode containing an extension
-    of the puzzle in its parent.  Return None if this is not possible.
-
-    @type puzzle: Puzzle
-    @rtype: PuzzleNode
-    """
+    # if leaf node, return to last branching point to continue search
+    if not start:
+        return
+    elif start.__str__() in visited:
+        pass
+    elif start.is_solved():
+        return
+    else:
+        visited.add(start.__str__())
+        nodes.append(get_node(start, parent))
+        for ext in start.extensions():
+            depth_first_search(ext, visited, nodes, start)
 
 
 def get_node(puzzle, parent=None):
@@ -122,6 +93,69 @@ def get_node(puzzle, parent=None):
     if parent:
         new_node.parent = parent
     return new_node
+
+
+def get_path(solution_node):
+    """
+    Return the first node in a doubly-linked list of PuzzleNodes from the
+    starting configuration to the PuzzleNode solution_node.
+
+    @type solution_node: PuzzleNode
+    @type visited: list[PuzzleNode]
+    @rtype: PuzzleNode
+    """
+    current = solution_node
+    # until at the root of the path (no parent)
+    while current.parent:
+        # walk over each node in doubly-linked list from solution_node
+        current = current.parent
+    return current
+
+
+
+# TODO
+# implement breadth_first_solve
+# do NOT change the type contract
+# you are welcome to create any helper functions
+# you like
+# Hint: you may find a queue useful, that's why
+# we imported deque
+def breadth_first_solve(puzzle):
+    """
+    Return a path from PuzzleNode(puzzle) to a PuzzleNode containing
+    a solution, with each child PuzzleNode containing an extension
+    of the puzzle in its parent.  Return None if this is not possible.
+
+    @type puzzle: Puzzle
+    @rtype: PuzzleNode
+    """
+
+    q = deque()
+    start = PuzzleNode(puzzle)
+
+    q.append(start)
+    tried_ext = []
+    while q:
+        node = q.popleft()
+        # this returns error code 'Puzzle" object has no attribute 'puzzle' :(
+        children = node.puzzle.extensions()
+        for ext in children:
+            if ext not in tried_ext:
+                puzzle_node = PuzzleNode(ext)
+                puzzle_node.parent = node
+                node.children.append(puzzle_node)
+                if not ext.is_solved():
+                    q.append(ext)
+                    tried_ext.append(ext)
+                else:
+                    final = []
+                    cur_node = ext
+                    while cur_node:
+                        final.append(cur_node)
+                        cur_node = ext.parent
+                    return final.reverse()
+    return None
+
 
 # Class PuzzleNode helps build trees of PuzzleNodes that have
 # an arbitrary number of children, and a parent.

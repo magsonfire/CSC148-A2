@@ -1,6 +1,5 @@
 from puzzle import Puzzle
 
-
 class MNPuzzle(Puzzle):
     """
     An nxm puzzle, like the 15-puzzle, which may be solved, unsolved,
@@ -25,116 +24,260 @@ class MNPuzzle(Puzzle):
         self.n, self.m = len(from_grid), len(from_grid[0])
         self.from_grid, self.to_grid = from_grid, to_grid
 
-    # TODO
     # implement __eq__ and __str__
     # __repr__ is up to you
     def __eq__(self, other):
-	    """
-		Return whether self is equivalent to other.
-		
-		@param MNPuzzle self: this MNPuzzle
-		@param MNPuzzle|object other: object to compare to self
-		@rtype: bool
-		
-		>>> start = (("*", "2", "3"), ("1", "4", "5"))
-		>>> finish = (("1", "2", "3"), ("4", "5", "*"))
-		>>> p1 = MNPuzzle(start, finish)
-		>>> p2 = MNPuzzle ((("*", "2", "3"), ("1", "4", "5")), (("1", "2", "3"), ("4", "5", "*")))
-		>>> p3 = MNPuzzle ((("1", "*", "3"), ("4", "2", "5")), (("1", "2", "3"), ("4", "5", "*")))
-		>>> p1 == p2
-		True
-		>>> p2 == p3
-		False
-		"""
-		pass
-	
-	def __str__(self):
-	    """
-		Return a human-friendly representation of MNPuzzle self.
-		
-		@param MNPuzzle self: this MNPuzzle
-		@rtype: str
-		
-		>>> p1 = MNPuzzle ((("*", "2", "3"), ("1", "4", "5")), (("1", "2", "3"), ("4", "5", "*")))
-		>>> print(p1)
-		
-		* 2 3 
-		1 4 5
-		=====
-		Target:
-		=====
-		1 2 3
-		4 5 *
-		
-		"""
-		current = " "
-		    for c in from_grid:
-			    row = " ".join(c)
-				current += row + "\n"
-			current += "=====" + "\n" + "Target:" + \\
-			            "=====" + "\n"
-			for d in to_grid:
-			    row = " ".join(d)
-				current += row + "\n"
-		return current
-	
+        """
+        Return whether self is equivalent to other.
+
+        @param MNPuzzle self: this MNPuzzle
+        @param MNPuzzle | object other: object to compare self to
+        @rtype: bool
+
+        >>> start = (("*", "2", "3"), ("1", "4", "5"))
+        >>> finish = (("1", "2", "3"), ("4", "5", "*"))
+        >>> p1 = MNPuzzle(start, finish)
+        >>> p2 = MNPuzzle ((("*", "2", "3"), ("1", "4", "5")), finish)
+        >>> p3 = MNPuzzle ((("1", "*", "3"), ("4", "2", "5")), finish)
+        >>> p1 == p2
+        True
+        >>> p2 == p3
+        False
+        """
+        return (type(self) == type(other) and
+                (self.from_grid == other.from_grid) and
+                (self.to_grid == other.to_grid))
+
+    def __str__(self):
+        """
+        Return a human-friendly representation of MNPuzzle self.
+
+        @param MNPuzzle self: this MNPuzzle
+        @rtype: str
+
+        >>> start = (("*", "2", "3"), ("1", "4", "5"))
+        >>> finish = (("1", "2", "3"), ("4", "5", "*"))
+        >>> p1 = MNPuzzle(start, finish)
+        >>> print(p1)
+        * 2 3
+        1 4 5
+        =====
+        Target:
+        =====
+        1 2 3
+        4 5 *
+        """
+        current = ""
+        for c in self.from_grid:
+            row1 = ""
+            for ch in c:
+                row1 += ch + " "
+            current += row1.rstrip() + "\n"
+        current += "=====" + "\n" + "Target:\n" + "=====" + "\n"
+        for d in self.to_grid:
+            row2 = " ".join(d)
+            current += row2.rstrip() + "\n"
+        return current.rstrip()
+
     # TODO
     # override extensions
     # legal extensions are configurations that can be reached by swapping one
     # symbol to the left, right, above, or below "*" with "*"
-    def extensions(self):
-	    """
-	    R
-		"""
-		#remember position of * by the row it's in and the column it's in
-		for row in from_grid:
-		    if "*" in row:
-			    row_position = from_grid.index(row)
-				column_position = row.index("*")
-				
-		#if the position to the RIGHT of the * does not exist,
-		#i.e. the * is in the last column, 
-		#i.e. column_position + 1 > length of the row, 
-		#then this move to the right does not exist either
-		#so if column_position + 1 < length of the row,
-		#start building the tuple that would make up the 'from_grid' parameter in the MNPuzzle init method
-		if column_position + 1 < len(from_grid[0]):
-		    
-			#copy all the rows above the row containing *
-			#i.e. copy all the rows from from_grid[0] up to but not including from_grid[row_position]
-			#then need to reconstruct the row (which is a tuple) containing * 
-			#with the * swapped with the symbol at column_position + 1
-			#need to put in if/else condition for when the * ends up being swapped into the last column
-			#or will get an error
-			#i.e. can't call from_grid[row_position][column_position + 2:] because index not in range
-			#then finish up by copying in all the rows after the row containing *
-		    next_grid = (from_grid[:row_position], (from_grid[row_position][:column_position], \\
-			                                        from_grid[row_position][column_position + 1], \\
-													"*", \\
-			                                        from_grid[row_position][column_position + 2:] if column_position + 2 > len(from_grid[0]) - 1 else pass), \\
-													from_grid[row_position + 1:])
-			#finally create the MNPuzzle object with the configuration of having moved the * to the right
-			#this possible configuration will be added to a list at the end after having
-			#created all the other possible extensions
-		    move_right = MNPuzzle(next_grid, to_grid)
-		
-		#if the * is not located in the first column, then the possibility
-		#to move * to the left exists
-		if column_position - 1 > 0:
-		    next_grid = (from_grid[:row_position], (from_grid[row_position][:column_position - 1] if column_position - 1 > 0 else pass, \\
-			                                        "*", \\
-													from_grid[row_position][column_position - 1], \\
-													from_grid[row_position][column_position:]), \\
-													from_grid[row_position + 1:])
-			move_left = MNPuzzle(next_grid, to_grid)
-		if row_position > 0:   
-		    next_grid = (from_grid[:row_position - 1], (from_grid[row_position - 1][:column_position], "*", from_grid[row_position - 1][column_position + 1:]), \\
-			    ()
 
+    def extensions(self):
+        """
+        Return a list of possible configurations one step away from the current
+        configuration.
+
+        >>> start = (("2", "*", "3"), ("1", "4", "5"))
+        >>> finish = (("1", "2", "3"), ("4", "5", "*"))
+        >>> right = MNPuzzle((("2", "3", "*"), ("1", "4", "5")), finish)
+        >>> left = MNPuzzle((("*", "2", "3"), ("1", "4", "5")), finish)
+        >>> down = MNPuzzle((("2", "4", "3"), ("1", "*", "5")), finish)
+        >>> p1 = MNPuzzle(start, finish)
+        >>> p1.extensions() == [right, left, down]
+        True
+        """
+        start = self.from_grid
+        for row in start:
+            if "*" in row:
+                row_pos = start.index(row)
+                col_pos = row.index("*")
+        if row_pos == 0 and col_pos == 0:
+            return [self.move_right(), self.move_down()]
+        if row_pos == 0 and col_pos == len(start[0]) - 1:
+            return [self.move_left(), self.move_down()]
+        if row_pos == len(start) - 1 and col_pos == 0:
+            return [self.move_right(), self.move_up()]
+        if row_pos == len(start) - 1 and col_pos == len(start[0]) - 1:
+            return [self.move_left(), self.move_up()]
+        if row_pos == 0:
+            return [self.move_right(), self.move_left(), self.move_down()]
+        if row_pos == len(start) - 1:
+            return [self.move_right(), self.move_left(), self.move_up()]
+        if col_pos == 0:
+            return [self.move_right(), self.move_down(), self.move_up()]
+        if col_pos == len(start[0]) - 1:
+            return [self.move_left(), self.move_down(), self.move_up()]
+        else:
+            return [self.move_right(), self.move_left(), self.move_up(), self.move_down()]
+
+    #helper functions
+    def move_left(self):
+        """
+        Return configuration of self when "*" is swapped with the element to the
+        left of "*".
+
+        >>> start = (("2", "*", "3"), ("1", "4", "5"))
+        >>> finish = (("1", "2", "3"), ("4", "5", "*"))
+        >>> p1 = MNPuzzle(start, finish)
+        >>> p1.move_left() == MNPuzzle((("*", "2", "3"), ("1", "4", "5")), finish)
+        True
+        """
+        
+        start = self.from_grid
+        end = self.to_grid
+        grid_list = []
+        #create list of str of all elements in grid
+        for row in start:
+            for x in row:
+                grid_list.append(x)
+        #remember position of * by row pos and col pos
+        row_pos = grid_list.index("*")
+        #swap * with symbol to its left
+        grid_list[row_pos] = grid_list[row_pos - 1]
+        grid_list[row_pos - 1] = "*"
+        #create new list to put in all new tuples of rows
+        final = []
+        #but first create tuples of appropriate length; start with index 0 and
+        i = 0
+        while i < len(grid_list):
+            #and fill each tuple with appropriate number of elements (row length)
+            a = tuple(grid_list[i:i + len(start[0])])
+            #add each tuple (i.e. row) to the final list as it is created
+            final.append(a)
+            #increment i by row length and create tuple for next row
+            i += len(start[0])
+        #return the tuple version of the final list of all the rows in grid
+        return MNPuzzle(tuple(final), end)
+            
+
+    def move_right(self):
+        """
+        Return configuration of self when "*" is swapped with the element
+        to the right of "*".
+
+        >>> start = (("2", "*", "3"), ("1", "4", "5"))
+        >>> finish = (("1", "2", "3"), ("4", "5", "*"))
+        >>> p1 = MNPuzzle(start, finish)
+        >>> p1.move_right() == MNPuzzle((("2", "3", "*"), ("1", "4", "5")), finish)
+        True
+
+        """
+        start = self.from_grid
+        end = self.to_grid
+        grid_list = []
+        for row in start:
+            for x in row:
+                grid_list.append(x)
+        row_pos = grid_list.index("*")
+        #swap * with symbol to its right
+        grid_list[row_pos] = grid_list[row_pos + 1]
+        grid_list[row_pos + 1] = "*"
+        final = []
+        i = 0
+        while i < len(grid_list):
+            a = tuple(grid_list[i:i + len(start[0])])
+            final.append(a)
+            i += len(start[0])
+        return MNPuzzle(tuple(final), end)
+    
+
+    def move_up(self):
+        """
+        Return the configuration of self when "*" is swapped with the element
+        above the "*".
+
+        >>> start = (("2", "4", "3"), ("1", "*", "5"))
+        >>> finish = (("1", "2", "3"), ("4", "5", "*"))
+        >>> p1 = MNPuzzle(start, finish)
+        >>> p1.move_up() == MNPuzzle((("2", "*", "3"), ("1", "4", "5")), finish)
+        True
+        """
+        start = self.from_grid
+        end = self.to_grid
+        grid_list = []
+        for row in start:
+            for x in row:
+                grid_list.append(x)
+        row_pos = grid_list.index("*")
+        #swap * with symbol that would be above * in grid configuration
+        #i.e. swap * with the symbol len(start[0]) places before *
+        grid_list[row_pos] = grid_list[row_pos - len(start[0])]
+        grid_list[row_pos - len(start[0])] = "*"
+        final = []
+        i = 0
+        while i < len(grid_list):
+            a = tuple(grid_list[i:i + len(start[0])])
+            final.append(a)
+            i += len(start[0])
+        return MNPuzzle(tuple(final), end)
+
+    def move_down(self):
+        """
+        Return the configuration of self when "*" is swapped with the element
+        below the "*".
+
+        >>> start = (("2", "*", "3"), ("1", "4", "5"))
+        >>> finish = (("1", "2", "3"), ("4", "5", "*"))
+        >>> p1 = MNPuzzle(start, finish)
+        >>> p1.move_down() == MNPuzzle((("2", "4", "3"), ("1", "*", "5")), finish)
+        True
+        """
+        start = self.from_grid
+        end = self.to_grid
+        grid_list = []
+        for row in start:
+            for x in row:
+                grid_list.append(x)
+        row_pos = grid_list.index("*")
+        #swap * with symbol that would be below * in grid configuration
+        #i.e. swap * with the symbol len(start[0]) places after *
+        grid_list[row_pos] = grid_list[row_pos + len(start[0])]
+        grid_list[row_pos + len(start[0])] = "*"
+        final = []
+        i = 0
+        while i < len(grid_list):
+            a = tuple(grid_list[i:i + len(start[0])])
+            final.append(a)
+            i += len(start[0])
+        return MNPuzzle(tuple(final), end)
+
+
+        
+           
     # TODO
     # override is_solved
     # a configuration is solved when from_grid is the same as to_grid
+    def is_solved(self):
+        """
+        Return whether the puzzle self is solved or not.
 
+        @param MNPuzzle self: this MNPuzzle
+        @rtype: bool
+
+        >>> start = (("2", "*", "3"), ("1", "4", "5"))
+        >>> finish = (("1", "2", "3"), ("4", "5", "*"))
+        >>> p1 = MNPuzzle(start, finish)
+        >>> p1.is_solved()
+        False
+        >>> start = (("1", "2", "3"), ("4", "5", "*"))
+        >>> p2 = MNPuzzle(start, finish)
+        >>> p2.is_solved()
+        True
+        
+        """
+        return self.from_grid == self.to_grid
 
 if __name__ == "__main__":
     import doctest
