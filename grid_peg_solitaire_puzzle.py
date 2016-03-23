@@ -1,5 +1,5 @@
 from puzzle import Puzzle
-
+import copy
 
 class GridPegSolitairePuzzle(Puzzle):
     """
@@ -32,9 +32,11 @@ class GridPegSolitairePuzzle(Puzzle):
                self._marker_set == other._marker_set)
 
     def __str__(self):
-        for r in self._marker:
-            for c in self._marker:
-                print('row {} : {} coloumn {} : {}').format(r,self._marker[r],c,self._marker[c])
+        output = '\n'
+        for r in range(len(self._marker)):
+            output += str(self._marker[r]) + "\n"
+
+        return output
 
     # __repr__ is up to you
 
@@ -63,7 +65,7 @@ class GridPegSolitairePuzzle(Puzzle):
             return get_position(r,c+1) == "*" and get_position(r,c+2) == '.'
 
         def move_right(r,c):
-            new_config = self._marker[:]
+            new_config = copy.deepcopy(self._marker)
             new_config[r][c] = '.'
             new_config[r][c+1] = '.'
             new_config[r][c+2] = '*'
@@ -73,7 +75,7 @@ class GridPegSolitairePuzzle(Puzzle):
             return get_position(r,c-1) == "*" and get_position(r,c-2) =='.'
 
         def move_left(r,c):
-            new_config = self._marker[:]
+            new_config = copy.deepcopy(self._marker)
             new_config[r][c] ='.'
             new_config[r][c-1] = '.'
             new_config[r][c-2] = '*'
@@ -83,7 +85,7 @@ class GridPegSolitairePuzzle(Puzzle):
             return get_position(r-1, c) == '*' and get_position(r-2,c) == '.'
 
         def move_up(r,c):
-            new_config = self._marker[:]
+            new_config = copy.deepcopy(self._marker)
             new_config[r][c] ='.'
             new_config[r-1][c] = '.'
             new_config[r-2][c] = '*'
@@ -93,7 +95,7 @@ class GridPegSolitairePuzzle(Puzzle):
             return get_position(r+1, c) == '*' and get_position(r+2,c) == '.'
 
         def move_down(r,c):
-            new_config = self._marker[:]
+            new_config = copy.deepcopy(self._marker)
             new_config[r][c] ='.'
             new_config[r+1][c] = '.'
             new_config[r+2][c] = '*'

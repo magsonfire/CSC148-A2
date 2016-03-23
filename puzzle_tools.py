@@ -33,16 +33,18 @@ def depth_first_solve(puzzle):
 
     visited = set()
     nodes = []
-    # until all extensions from starting config are exhausted
-    while not all([str(puzzle.extensions())]) in visited:
-        depth_first_search(puzzle, visited, nodes)
+    level = 0
 
+    depth_first_search(puzzle, visited, nodes, level)
+
+    print("done searching")
     # solution_node should be last node visited
-    solution_node = nodes[-1]
-    return get_path(solution_node)
+    #solution_node = nodes[-1]
+    #return get_path(solution_node)
+    return nodes
 
 
-def depth_first_search(start, visited, nodes, parent=None):
+def depth_first_search(start, visited, nodes, level, parent=None):
     """
     Search for a PuzzleNode containing the solution to the configuration in
     PuzzleNode start.
@@ -53,18 +55,29 @@ def depth_first_search(start, visited, nodes, parent=None):
     @type parent: PuzzleNode | None
     @rtype: None
     """
+
+    print("recursing", len(visited), len(nodes), start, level)
+
     # if leaf node, return to last branching point to continue search
     if not start:
-        return
-    elif start.__str__() in visited:
-        pass
-    elif start.is_solved():
-        return
+        return None
+    elif str(start) in visited:
+        return None
     else:
-        visited.add(start.__str__())
-        nodes.append(get_node(start, parent))
-        for ext in start.extensions():
-            depth_first_search(ext, visited, nodes, start)
+        visited.add(str(start))
+        if start.is_solved():
+            return PuzzleNode(start)
+        else:
+            possible_extensions = start.extensions()
+            for ext in possible_extensions:
+                result = depth_first_search(ext, visited, nodes, level+1, start)
+                if result is not None:
+                    new_node = PuzzleNode(result, parent=start)
+                    nodes.append(new_node)
+                    return new_node
+                else:
+                    print("not solvable", start, level)
+                    return None
 
 
 def get_node(puzzle, parent=None):
