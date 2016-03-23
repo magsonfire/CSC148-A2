@@ -32,6 +32,15 @@ class GridPegSolitairePuzzle(Puzzle):
                self._marker_set == other._marker_set)
 
     def __str__(self):
+        # game = ''
+        #
+        # for row in self._marker:
+        #     row_output = ''
+        #     for column in row:
+        #         row_output += column + ' '
+        #     game += row_output.rstrip() + "--" * len(self._marker[0])
+        # return game
+
         output = '\n'
         for r in range(len(self._marker)):
             output += str(self._marker[r]) + "\n"
